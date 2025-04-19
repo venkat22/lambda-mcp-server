@@ -1,6 +1,0 @@
-{
-  "headers": {
-    "content-type": "application/json"
-  },
-  "body": "{\"jsonrpc\": \"2.0\", \"method\": \"get_time\", \"params\": {}, \"id\": 1}"
-} 
