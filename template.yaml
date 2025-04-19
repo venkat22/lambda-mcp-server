@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: MCP-compliant server using HTTP in Lambda
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: python3.12
+    Architectures: [x86_64]
+
+Resources:
+  MCPServerLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: mcp-server-layer
+      Description: MCP Server Lambda Layer
+      ContentUri: lambda_layer/
+      CompatibleRuntimes:
+        - python3.9
+        - python3.10
+        - python3.11
+        - python3.12
+      RetentionPolicy: Retain
+      LicenseInfo: MIT
+
+  McpServerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: mcp_function.app.lambda_handler
+      CodeUri: function/
+      Layers:
+        - !Ref MCPServerLayer
+      Events:
+        McpAPI:
+          Type: Api
+          Properties:
+            Path: /mcp
+            Method: POST
+
+Outputs:
+  MCPServerApi:
+    Description: "API Gateway endpoint URL for MCP server"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/mcp"
+  MCPServerLayer:
+    Description: "ARN for the MCP Server Layer"
+    Value: !Ref MCPServerLayer

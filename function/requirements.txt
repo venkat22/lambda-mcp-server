@@ -1,0 +1,1 @@
+# No direct requirements needed - all provided by the layer 
