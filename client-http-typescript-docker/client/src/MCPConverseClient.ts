@@ -8,8 +8,8 @@ export class MCPConverseClient extends MCPClient {
     private converseAgent: ConverseAgent;
     private converseTools: ConverseTools;
 
-    constructor(serverUrl: string = serverConfig.url, modelId: string = bedrockConfig.modelId) {
-        super(serverUrl);
+    constructor(serverUrl: string = serverConfig.url, apiKey: string = serverConfig.apiKey, modelId: string = bedrockConfig.modelId) {
+        super(serverUrl, apiKey);
         this.converseAgent = new ConverseAgent(modelId, bedrockConfig.region, bedrockConfig.systemPrompt);
         this.converseTools = new ConverseTools();
     }

@@ -7,13 +7,61 @@ Globals:
     Timeout: 60
     Runtime: python3.12
     Architectures: [x86_64]
+  Api:
+    Auth:
+      ApiKeyRequired: true
 
 Resources:
+  McpApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: McpServerApiKey
+      Description: API Key for MCP Server
+      Enabled: true
+
+  McpUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: McpServerUsagePlan
+      Description: Usage plan for MCP Server API
+      ApiStages:
+        - ApiId: !Ref ServerlessRestApi
+          Stage: Prod
+    DependsOn: McpServerFunction
+
+  McpUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref McpApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref McpUsagePlan
+
+  McpSessionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-mcp-sessions"
+      AttributeDefinitions:
+        - AttributeName: session_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: session_id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      TimeToLiveSpecification:
+        AttributeName: expires_at
+        Enabled: true
+      Tags:
+        - Key: Purpose
+          Value: MCP Session Management
+
   McpServerFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: app.lambda_handler
       CodeUri: server/
+      Environment:
+        Variables:
+          MCP_SESSION_TABLE: !Ref McpSessionsTable
       Policies:
         - Statement:
             - Effect: Allow
@@ -21,14 +69,29 @@ Resources:
                 - s3:ListBuckets
                 - s3:ListAllMyBuckets
               Resource: '*'
+            - Effect: Allow
+              Action:
+                - dynamodb:CreateTable
+                - dynamodb:DeleteItem
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeTable
+              Resource: !GetAtt McpSessionsTable.Arn
       Events:
         McpAPI:
           Type: Api
           Properties:
             Path: /mcp
-            Method: POST
+            Method: ANY
 
 Outputs:
   MCPServerApi:
     Description: "API Gateway endpoint URL for MCP server"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/mcp"
+  McpSessionsTableName:
+    Description: "Name of the DynamoDB table for MCP sessions"
+    Value: !Ref McpSessionsTable
+  ApiKeyId:
+    Description: "API Key ID for accessing the MCP Server (you will need to get the key from the API Gateway console)"
+    Value: !Ref McpApiKey

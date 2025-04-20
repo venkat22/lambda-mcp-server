@@ -10,7 +10,7 @@ export class MCPClient extends EventEmitter {
   // private transport: SSEClientTransport;
   private transport: StreamableHTTPClientTransport;
 
-  constructor(serverUrl: string) {
+  constructor(serverUrl: string, apiKey: string) {
     super();
     this.client = new Client({
       name: 'mcp-bedrock-demo',
@@ -19,7 +19,14 @@ export class MCPClient extends EventEmitter {
 
     // Create a transport to connect to our server
     this.transport = new StreamableHTTPClientTransport(
-      new URL(serverUrl)
+      new URL(serverUrl),
+      {
+        requestInit: {
+          headers: {
+            'x-api-key': apiKey
+          }
+        }
+      }
     );
 
     // Set up notification handlers

@@ -5,8 +5,10 @@ set -e
 
 echo "🚀 Starting MCP Client..."
 
-# Config file for storing MCP URL
+# Config file for storing MCP URL and API Key
 CONFIG_FILE=".mcp-config"
+API_KEY_FILE=".mcp-api-key"
+HASH_FILE=".docker-build-hash"
 
 # Function to read MCP URL from config file
 get_saved_mcp_url() {
@@ -15,8 +17,23 @@ get_saved_mcp_url() {
     fi
 }
 
+# Function to read MCP API Key from config file
+get_saved_api_key() {
+    if [ -f "$API_KEY_FILE" ]; then
+        cat "$API_KEY_FILE"
+    fi
+}
+
+# Function to calculate hash of Dockerfile and source code
+calculate_build_hash() {
+    find ./client -type f \( -name "Dockerfile" -o -path "*/src/*" \) -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1
+}
+
 # Get saved MCP URL if it exists
 SAVED_MCP_URL=$(get_saved_mcp_url)
+
+# Get saved API Key if it exists
+SAVED_API_KEY=$(get_saved_api_key)
 
 # Prompt for MCP URL with default if available
 if [ -n "$SAVED_MCP_URL" ]; then
@@ -26,8 +43,19 @@ else
     read -p "Enter MCP server URL: " MCP_URL
 fi
 
+# Prompt for MCP API Key with default if available
+if [ -n "$SAVED_API_KEY" ]; then
+    read -p "Enter MCP API Key (press Enter to use saved key): " MCP_API_KEY
+    MCP_API_KEY=${MCP_API_KEY:-$SAVED_API_KEY}
+else
+    read -p "Enter MCP API Key: " MCP_API_KEY
+fi
+
 # Save the URL for next time
 echo "$MCP_URL" > "$CONFIG_FILE"
+
+# Save the API Key for next time
+echo "$MCP_API_KEY" > "$API_KEY_FILE"
 
 echo "📦 Getting AWS credentials from your current session..."
 
@@ -60,9 +88,21 @@ else
     echo "✅ Using region: $AWS_REGION"
 fi
 
-# Build the container
-echo "🏗️  Building the client container..."
-docker build -t mcp-client ./client
+# Calculate current hash
+CURRENT_HASH=$(calculate_build_hash)
+STORED_HASH=""
+if [ -f "$HASH_FILE" ]; then
+    STORED_HASH=$(cat "$HASH_FILE")
+fi
+
+# Build the container if hash has changed or doesn't exist
+if [ "$CURRENT_HASH" != "$STORED_HASH" ]; then
+    echo "🏗️  Changes detected, rebuilding the client container..."
+    docker build -t mcp-client ./client
+    echo "$CURRENT_HASH" > "$HASH_FILE"
+else
+    echo "✅ No changes detected, using existing container"
+fi
 
 # Run the container
 echo "🚀 Running the client container..."
@@ -73,5 +113,6 @@ docker run -it \
     -e AWS_REGION="$AWS_REGION" \
     -e NODE_ENV=development \
     -e MCP_URL="$MCP_URL" \
+    -e MCP_API_KEY="$MCP_API_KEY" \
     -v "$(pwd)/client/src:/app/src" \
     mcp-client 

@@ -28,7 +28,66 @@ def lambda_handler(event, context):
 
 That's it! :) 
 
-## What is it?
+## Session State Management
+
+The Lambda MCP Server includes built-in session state management that persists across tool invocations within the same conversation. This is particularly useful for tools that need to maintain context or share data between calls.
+
+Session data is stored in a DynamoDB table against a sessionId key. This is all managed for you.
+
+Here's an example of how to use session state:
+
+```Python
+from lambda_mcp.lambda_mcp import LambdaMCPServer
+
+session_table = os.environ.get('MCP_SESSION_TABLE', 'mcp_sessions')
+
+mcp_server = LambdaMCPServer(name="mcp-lambda-server", version="1.0.0", session_table=session_table)
+
+@mcp_server.tool()
+def increment_counter() -> int:
+    """Increment a session-based counter."""
+    # Get the current counter value from session state, default to 0 if not set
+    counter = mcp_server.session.get('counter', 0)
+    
+    # Increment the counter
+    counter += 1
+    
+    # Store the new value in session state
+    mcp_server.session['counter'] = counter
+    
+    return counter
+
+@mcp_server.tool()
+def get_counter() -> int:
+    """Get the current counter value."""
+    return mcp_server.session.get('counter', 0)
+```
+
+The session state is automatically managed per conversation and persists across multiple tool invocations. This allows you to maintain stateful information without needing additional external storage, while still keeping your Lambda function stateless.
+
+## API Key Authentication
+
+The sample server stack creates and manages an API key for authentication. This provides a basic level of security for your MCP server endpoints. Here's what you need to know:
+
+1. **API Key Generation**: When you deploy the stack, an API key is automatically created in API Gateway
+2. **Accessing the API Key**: 
+   - Navigate to the AWS Console > API Gateway
+   - Select your API
+   - Go to the "API Keys" section
+   - Find the key named "mcp-lambda-server-key" (or similar based on your stack name - the id of the key is provided by the stack outputs)
+
+3. **Using the API Key**: The client must include the API key in requests using the `x-api-key` header.  This is managed for you in the sample client, you will be prompted by the run script for the sample client to provide the key.
+
+⚠️ **Security Note**: The `run-client.sh` script will store the provided API key in a file called `.mcp-api-key` as well as the provided URL in `.mcp-config`.  While this is a convenience, this is not a production ready implementation.
+
+⚠️ **Security Note**: While API keys provide a basic authentication mechanism, they should not be your only security measure when dealing with sensitive data. Consider implementing additional security measures such as:
+- AWS IAM roles and policies
+- OAuth 2.0 / JWT authentication
+- etc
+
+The API key is primarily intended for basic request authentication and abuse prevention. For production systems handling sensitive data, implement appropriate additional security measures based on your specific requirements.
+
+## What is this all about?
 
 This is a proof-of-concept implementation of an MCP server running on AWS Lambda, along with a TypeScript client that demonstrates its functionality. The project consists of two main components:
 
