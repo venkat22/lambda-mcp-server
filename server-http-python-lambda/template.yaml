@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: MCP-compliant server using HTTP in Lambda
 
+Parameters:
+  McpAuthToken:
+    Type: String
+    NoEcho: true
+    Description: "The authentication token for MCP"
+
 Globals:
   Function:
     Timeout: 60
@@ -29,7 +35,7 @@ Resources:
       CodeUri: authorizer/
       Environment:
         Variables:
-          MCP_AUTH_TOKEN: "eifjcbdkukujnfkltecefdrcefuekerfiveiuifhhebb"
+          MCP_AUTH_TOKEN: !Ref McpAuthToken
       Policies:
         - Version: '2012-10-17'
           Statement:
