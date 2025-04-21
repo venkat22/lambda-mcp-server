@@ -7,7 +7,7 @@ echo "🚀 Starting MCP Client..."
 
 # Config file for storing MCP URL and API Key
 CONFIG_FILE=".mcp-config"
-API_KEY_FILE=".mcp-api-key"
+API_TOKEN_FILE=".mcp-api-token"
 HASH_FILE=".docker-build-hash"
 
 # Function to read MCP URL from config file
@@ -18,9 +18,9 @@ get_saved_mcp_url() {
 }
 
 # Function to read MCP API Key from config file
-get_saved_api_key() {
-    if [ -f "$API_KEY_FILE" ]; then
-        cat "$API_KEY_FILE"
+get_saved_api_token() {
+    if [ -f "$API_TOKEN_FILE" ]; then
+        cat "$API_TOKEN_FILE"
     fi
 }
 
@@ -33,7 +33,7 @@ calculate_build_hash() {
 SAVED_MCP_URL=$(get_saved_mcp_url)
 
 # Get saved API Key if it exists
-SAVED_API_KEY=$(get_saved_api_key)
+SAVED_API_TOKEN=$(get_saved_api_token)
 
 # Prompt for MCP URL with default if available
 if [ -n "$SAVED_MCP_URL" ]; then
@@ -44,18 +44,18 @@ else
 fi
 
 # Prompt for MCP API Key with default if available
-if [ -n "$SAVED_API_KEY" ]; then
-    read -p "Enter MCP API Key (press Enter to use saved key): " MCP_API_KEY
-    MCP_API_KEY=${MCP_API_KEY:-$SAVED_API_KEY}
+if [ -n "$SAVED_API_TOKEN" ]; then
+    read -p "Enter MCP Auth token (press Enter to use saved token): " MCP_TOKEN
+    MCP_TOKEN=${MCP_TOKEN:-$SAVED_API_TOKEN}
 else
-    read -p "Enter MCP API Key: " MCP_API_KEY
+    read -p "Enter MCP API Token: " MCP_TOKEN
 fi
 
 # Save the URL for next time
 echo "$MCP_URL" > "$CONFIG_FILE"
 
 # Save the API Key for next time
-echo "$MCP_API_KEY" > "$API_KEY_FILE"
+echo "$MCP_TOKEN" > "$API_TOKEN_FILE"
 
 echo "📦 Getting AWS credentials from your current session..."
 
@@ -113,6 +113,6 @@ docker run -it \
     -e AWS_REGION="$AWS_REGION" \
     -e NODE_ENV=development \
     -e MCP_URL="$MCP_URL" \
-    -e MCP_API_KEY="$MCP_API_KEY" \
+    -e MCP_TOKEN="$MCP_TOKEN" \
     -v "$(pwd)/client/src:/app/src" \
     mcp-client 

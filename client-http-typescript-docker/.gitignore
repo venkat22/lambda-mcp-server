@@ -1,6 +1,7 @@
 .mcp-api-key
 .mcp-config
 .docker-build-hash
+.mcp-api-token
 
 # Dependencies
 node_modules/

@@ -7,34 +7,35 @@ Globals:
     Timeout: 60
     Runtime: python3.12
     Architectures: [x86_64]
-  Api:
-    Auth:
-      ApiKeyRequired: true
 
 Resources:
-  McpApiKey:
-    Type: AWS::ApiGateway::ApiKey
+  McpApi:
+    Type: AWS::Serverless::Api
     Properties:
-      Name: McpServerApiKey
-      Description: API Key for MCP Server
-      Enabled: true
+      StageName: Prod
+      Auth:
+        Authorizers:
+          TokenAuthorizer:
+            FunctionArn: !GetAtt McpAuthorizerFunction.Arn
+            FunctionPayloadType: TOKEN
+            Identity:
+              ReauthorizeEvery: 300
+              Header: Authorization
 
-  McpUsagePlan:
-    Type: AWS::ApiGateway::UsagePlan
+  McpAuthorizerFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      UsagePlanName: McpServerUsagePlan
-      Description: Usage plan for MCP Server API
-      ApiStages:
-        - ApiId: !Ref ServerlessRestApi
-          Stage: Prod
-    DependsOn: McpServerFunction
-
-  McpUsagePlanKey:
-    Type: AWS::ApiGateway::UsagePlanKey
-    Properties:
-      KeyId: !Ref McpApiKey
-      KeyType: API_KEY
-      UsagePlanId: !Ref McpUsagePlan
+      Handler: app.lambda_handler
+      CodeUri: authorizer/
+      Environment:
+        Variables:
+          MCP_AUTH_TOKEN: "eifjcbdkukujnfkltecefdrcefuekerfiveiuifhhebb"
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: 'lambda:InvokeFunction'
+              Resource: '*'
 
   McpSessionsTable:
     Type: AWS::DynamoDB::Table
@@ -84,14 +85,14 @@ Resources:
           Properties:
             Path: /mcp
             Method: ANY
+            RestApiId: !Ref McpApi
+            Auth:
+              Authorizer: TokenAuthorizer
 
 Outputs:
   MCPServerApi:
     Description: "API Gateway endpoint URL for MCP server"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/mcp"
+    Value: !Sub "https://${McpApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/mcp"
   McpSessionsTableName:
     Description: "Name of the DynamoDB table for MCP sessions"
     Value: !Ref McpSessionsTable
-  ApiKeyId:
-    Description: "API Key ID for accessing the MCP Server (you will need to get the key from the API Gateway console)"
-    Value: !Ref McpApiKey

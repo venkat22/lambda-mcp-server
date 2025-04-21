@@ -5,8 +5,8 @@ import { serverConfig } from './config/bedrock.js';
 
 async function main() {
     const serverUrl = serverConfig.url;
-    const apiKey = serverConfig.apiKey;
-    const client = new MCPConverseClient(serverUrl, apiKey);
+    const apiToken = serverConfig.apiToken;
+    const client = new MCPConverseClient(serverUrl, apiToken);
 
     try {
         await client.connect();

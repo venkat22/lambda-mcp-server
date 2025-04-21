@@ -2,7 +2,7 @@
 
 > This server requires a client that supports Streamable HTTP (not SSE).  There are very few MCP clients that currently support Streamable HTTP (let me know if you have one), as such there is a Streamable HTTP client included in this repo, built with the [TypeScript MCP SDK which does support Streamable HTTP](https://github.com/modelcontextprotocol/typescript-sdk?tab=readme-ov-file#streamable-http).
 
-This project demonstrates a powerful and developer-friendly way to create serverless [MCP (Model Context Protocol)](https://github.com/modelcontextprotocol) tools using [AWS Lambda](https://aws.amazon.com/lambda/?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code). It showcases how to build a stateless (with session management), serverless MCP server with minimal boilerplate and an excellent developer experience.
+This project demonstrates a powerful and developer-friendly way to create serverless [MCP (Model Context Protocol)](https://github.com/modelcontextprotocol) tools using [AWS Lambda](https://aws.amazon.com/lambda/?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code). It showcases how to build a stateless, serverless MCP server with minimal boilerplate and an excellent developer experience.
 
 The included client demonstrates integration with [Amazon Bedrock](https://aws.amazon.com/bedrock/?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code), using the Bedrock Converse API and [Amazon Nova Pro](https://docs.aws.amazon.com/nova/latest/userguide/what-is-nova.html?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code) to build an intelligent agent.
 
@@ -65,27 +65,26 @@ def get_counter() -> int:
 
 The session state is automatically managed per conversation and persists across multiple tool invocations. This allows you to maintain stateful information without needing additional external storage, while still keeping your Lambda function stateless.
 
-## API Key Authentication
+## Authentication
 
-The sample server stack creates and manages an API key for authentication. This provides a basic level of security for your MCP server endpoints. Here's what you need to know:
+The sample server stack uses Bearer token authentication via an Authorization header, which is compliant with the MCP standard. This provides a basic level of security for your MCP server endpoints. Here's what you need to know:
 
-1. **API Key Generation**: When you deploy the stack, an API key is automatically created in API Gateway
-2. **Accessing the API Key**: 
-   - Navigate to the AWS Console > API Gateway
-   - Select your API
-   - Go to the "API Keys" section
-   - Find the key named "mcp-lambda-server-key" (or similar based on your stack name - the id of the key is provided by the stack outputs)
+1. **Bearer Token**: When you deploy the stack, a bearer token is configured through a custom authorizer in API Gateway
+2. **Using the Bearer Token**: 
+   - The client must include the bearer token in requests using the `Authorization` header with the format: `Bearer <your-token>`
+   - The token value is provided in the stack outputs after deployment
+   - The sample client is configured to automatically include this header when provided with the token
 
-3. **Using the API Key**: The client must include the API key in requests using the `x-api-key` header.  This is managed for you in the sample client, you will be prompted by the run script for the sample client to provide the key.
+3. **Custom Authorizer**: The implementation uses a simple custom authorizer that validates a single bearer token. This can be easily extended or replaced with more sophisticated authentication systems like Amazon Cognito for production use.
 
-⚠️ **Security Note**: The `run-client.sh` script will store the provided API key in a file called `.mcp-api-key` as well as the provided URL in `.mcp-config`.  While this is a convenience, this is not a production ready implementation.
+⚠️ **Security Note**: The `run-client.sh` script will store the provided bearer token in a file called `.mcp-api-token` as well as the provided URL in `.mcp-config`. While this is a convenience, this is not a production ready implementation.
 
-⚠️ **Security Note**: While API keys provide a basic authentication mechanism, they should not be your only security measure when dealing with sensitive data. Consider implementing additional security measures such as:
+⚠️ **Security Note**: While bearer token authentication provides a standard-compliant authentication mechanism, consider implementing additional security measures such as:
 - AWS IAM roles and policies
-- OAuth 2.0 / JWT authentication
-- etc
+- OAuth 2.0 / JWT with proper token management
+- Amazon Cognito User Pools
 
-The API key is primarily intended for basic request authentication and abuse prevention. For production systems handling sensitive data, implement appropriate additional security measures based on your specific requirements.
+The current bearer token implementation is primarily intended for demonstration and development purposes. For production systems handling sensitive data, implement appropriate additional security measures based on your specific requirements.
 
 ## What is this all about?
 
@@ -198,3 +197,19 @@ For AWS security best practices, refer to the [AWS Security Documentation](https
 ## License
 
 This library is licensed under the [MIT-0 License](https://github.com/aws/mit-0). See the LICENSE file.
+
+## Changes
+
+### Version 1.1.0
+- Replaced API Key authentication with Bearer token authentication via Authorization header
+- Added custom authorizer to API Gateway for token validation
+- Updated client configuration to use bearer tokens
+- Made authentication system compliant with MCP standard
+- Added this change log section
+
+### Version 1.0.0
+- Initial release
+- Basic MCP server implementation with AWS Lambda
+- Session state management with DynamoDB
+- Example tools implementation
+- TypeScript HTTP client with Amazon Bedrock integration
