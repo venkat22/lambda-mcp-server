@@ -139,7 +139,7 @@ Before running the client, ensure you have:
    sam deploy --guided
    ```
 
-   Note: This deploys an unauthenticated endpoint for demonstration purposes. For production use, implement appropriate authentication using [AWS API Gateway authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code).
+   Note: You will be prompted for an `McpAuthToken`.  This is the Authorization Bearer token that will be requitred to call the endpoint. This simple implimentation uses an [AWS API Gateway authorizers](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code) with the `McpAuthToken` passed in as an env var.  This can be swapped out for a production implimentation as required. 
 
 ### Client Setup
 
