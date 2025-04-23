@@ -6,6 +6,8 @@ This project demonstrates a powerful and developer-friendly way to create server
 
 The included client demonstrates integration with [Amazon Bedrock](https://aws.amazon.com/bedrock/?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code), using the Bedrock Converse API and [Amazon Nova Pro](https://docs.aws.amazon.com/nova/latest/userguide/what-is-nova.html?trk=64e03f01-b931-4384-846e-db0ba9fa89f5&sc_channel=code) to build an intelligent agent.
 
+[![Video Title](https://img.youtube.com/vi/Ejua5LQTqek/0.jpg)](https://youtu.be/Ejua5LQTqek)
+
 ## Example
 
 After you import LambdaMCPServer, this is all the code you need:
