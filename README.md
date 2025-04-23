@@ -10,7 +10,11 @@ The included client demonstrates integration with [Amazon Bedrock](https://aws.a
 
 In a recent epiosde of [the_context](https://www.youtube.com/playlist?list=PLeAh2CQypN9V8E-pkG6ZAXj-w3dgy1qQn) Tiffany Souterre and Mike disucssed streamable HTTP for MPC, and running this project: 
 
-[![Video Title](https://img.youtube.com/vi/Ejua5LQTqek/0.jpg)](https://youtu.be/Ejua5LQTqek)
+<p align="center">
+  <a href="https://youtu.be/Ejua5LQTqek">
+    <img src="thumb.png" alt="MCP - Can Lambda do it? - Streamable HTTP Model Context Protocol" width="600" /><br>
+  </a>
+</p>
 
 ## Example
 
