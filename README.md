@@ -8,7 +8,7 @@ The included client demonstrates integration with [Amazon Bedrock](https://aws.a
 
 ## the_context()
 
-In a recent epiosde of [the_context](https://www.youtube.com/playlist?list=PLeAh2CQypN9V8E-pkG6ZAXj-w3dgy1qQn) Tiffany Souterre and Mike disucssed streamable HTTP for MPC, and running this project: 
+In a recent episode of [the_context](https://www.youtube.com/playlist?list=PLeAh2CQypN9V8E-pkG6ZAXj-w3dgy1qQn), Tiffany Souterre and Mike discussed streamable HTTP for MCP as well as running this project:
 
 <p align="center">
   <a href="https://youtu.be/Ejua5LQTqek">
