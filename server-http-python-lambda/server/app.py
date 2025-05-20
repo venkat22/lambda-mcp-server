@@ -2,7 +2,7 @@ from lambda_mcp.lambda_mcp import LambdaMCPServer
 from datetime import datetime, UTC
 import random
 import boto3
-import os
+import oserd
 # Get session table name from environment variable
 session_table = os.environ.get('MCP_SESSION_TABLE', 'mcp_sessions')
 
