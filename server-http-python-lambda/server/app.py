@@ -2,7 +2,7 @@ from lambda_mcp.lambda_mcp import LambdaMCPServer
 from datetime import datetime, UTC
 import random
 import boto3
-import oserd
+import os  # <-- Fix: import os
 # Get session table name from environment variable
 session_table = os.environ.get('MCP_SESSION_TABLE', 'mcp_sessions')
 
@@ -36,4 +36,4 @@ def count_s3_buckets() -> int:
 
 def lambda_handler(event, context):
     """AWS Lambda handler function."""
-    return mcp_server.handle_request(event, context) 
+    return mcp_server.handle_request(event, context)
